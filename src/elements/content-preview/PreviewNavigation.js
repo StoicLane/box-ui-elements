@@ -31,7 +31,7 @@ const PreviewNavigation = ({ collection = [], currentIndex, onNavigateLeft, onNa
     return (
         <Routes>
             <Route
-                path="/:activeTab/:deeplink"
+                path="/vault/:activeTab/:deeplink"
                 element={
                     <PreviewNavigationComponent
                         onNavigateLeft={onNavigateLeft}

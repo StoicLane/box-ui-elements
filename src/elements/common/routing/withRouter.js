@@ -1,19 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { matchPath, useLocation, useNavigate, useParams } from 'react-router-dom';
-
-// Custom hook to get history from React Router v6
-function useHistory() {
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    return {
-        push: (to, state) => navigate(to, { state }),
-        replace: (to, state) => navigate(to, { state, replace: true }),
-        go: navigate,
-        location,
-    };
-}
+import { matchPath, useLocation, useParams } from 'react-router-dom';
+import useHistory from './useHistory';
 
 // withRouter HOC for React Router v6 that sends history and match similar to v5
 export default function withRouter(Wrapped) {
