@@ -17,7 +17,7 @@ import setProp from 'lodash/set';
 import throttle from 'lodash/throttle';
 import uniqueid from 'lodash/uniqueId';
 import Measure from 'react-measure';
-import { withRouter } from 'react-router-dom';
+import { withRouter } from '../common/routing';
 import type { ContextRouter } from 'react-router-dom';
 import { decode } from '../../utils/keys';
 import makeResponsive from '../common/makeResponsive';
@@ -40,9 +40,7 @@ import PreviewMask from './PreviewMask';
 import PreviewNavigation from './PreviewNavigation';
 import {
     withAnnotations,
-    WithAnnotationsProps,
     withAnnotatorContext,
-    WithAnnotatorContextProps,
 } from '../common/annotator-context';
 import {
     DEFAULT_HOSTNAME_API,
@@ -69,6 +67,30 @@ import type APICache from '../../utils/Cache';
 import '../common/fonts.scss';
 import '../common/base.scss';
 import './ContentPreview.scss';
+
+interface WithAnnotatorContextProps {
+    annotatorState?: AnnotatorState;
+    emitActiveAnnotationChangeEvent?: (id: string) => void;
+    emitAnnotationRemoveEvent?: (id: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyCreateEvent?: (
+        reply: Object,
+        requestId: string,
+        annotationId: string,
+        isStartEvent?: boolean,
+    ) => void;
+    emitAnnotationReplyDeleteEvent?: (id: string, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyUpdateEvent?: (reply: Object, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationUpdateEvent?: (annotation: Object, isStartEvent?: boolean) => void;
+    getAnnotationsMatchPath?: GetMatchPath;
+    getAnnotationsPath?: (fileVersionId?: string, annotationId?: string) => string;
+}
+
+type WithAnnotationsProps = {
+    location?: Location;
+    onAnnotator: (annotator: Annotator) => void;
+    onError?: (error: Error, code: string, contextInfo?: Record<string, unknown>) => void;
+    onPreviewDestroy: (shouldReset?: boolean) => void;
+};
 
 type StartAt = {
     unit: 'pages' | 'seconds',

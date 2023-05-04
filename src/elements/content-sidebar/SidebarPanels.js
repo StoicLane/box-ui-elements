@@ -4,32 +4,30 @@
  * @author Box
  */
 
-import * as React from 'react';
 import flow from 'lodash/flow';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import SidebarUtils from './SidebarUtils';
-import withSidebarAnnotations from './withSidebarAnnotations';
-import { withAnnotatorContext } from '../common/annotator-context';
-import { withAPIContext } from '../common/api-context';
-import { withRouterAndRef } from '../common/routing';
+import * as React from 'react';
+import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
+import type { BoxItem, User } from '../../common/types/core';
 import {
     ORIGIN_ACTIVITY_SIDEBAR,
     ORIGIN_DETAILS_SIDEBAR,
     ORIGIN_METADATA_SIDEBAR,
     ORIGIN_SKILLS_SIDEBAR,
-    ORIGIN_VERSIONS_SIDEBAR,
     SIDEBAR_VIEW_ACTIVITY,
     SIDEBAR_VIEW_DETAILS,
     SIDEBAR_VIEW_METADATA,
     SIDEBAR_VIEW_SKILLS,
-    SIDEBAR_VIEW_VERSIONS,
 } from '../../constants';
-import type { DetailsSidebarProps } from './DetailsSidebar';
-import type { ActivitySidebarProps } from './ActivitySidebar';
-import type { MetadataSidebarProps } from './MetadataSidebar';
-import type { VersionsSidebarProps } from './versions';
-import type { User, BoxItem } from '../../common/types/core';
+import { withAnnotatorContext } from '../common/annotator-context';
+import { withAPIContext } from '../common/api-context';
 import type { Errors } from '../common/flowTypes';
+import { withRouterAndRef } from '../common/routing';
+import type { ActivitySidebarProps } from './ActivitySidebar';
+import type { DetailsSidebarProps } from './DetailsSidebar';
+import type { MetadataSidebarProps } from './MetadataSidebar';
+import SidebarUtils from './SidebarUtils';
+import type { VersionsSidebarProps } from './versions';
+import withSidebarAnnotations from './withSidebarAnnotations';
 
 type Props = {
     activitySidebarProps: ActivitySidebarProps,
@@ -68,7 +66,7 @@ const MARK_NAME_JS_LOADING_DETAILS = `${ORIGIN_DETAILS_SIDEBAR}${BASE_EVENT_NAME
 const MARK_NAME_JS_LOADING_ACTIVITY = `${ORIGIN_ACTIVITY_SIDEBAR}${BASE_EVENT_NAME}`;
 const MARK_NAME_JS_LOADING_SKILLS = `${ORIGIN_SKILLS_SIDEBAR}${BASE_EVENT_NAME}`;
 const MARK_NAME_JS_LOADING_METADATA = `${ORIGIN_METADATA_SIDEBAR}${BASE_EVENT_NAME}`;
-const MARK_NAME_JS_LOADING_VERSIONS = `${ORIGIN_VERSIONS_SIDEBAR}${BASE_EVENT_NAME}`;
+// const MARK_NAME_JS_LOADING_VERSIONS = `${ORIGIN_VERSIONS_SIDEBAR}${BASE_EVENT_NAME}`;
 
 const URL_TO_FEED_ITEM_TYPE = { annotations: 'annotation', comments: 'comment', tasks: 'task' };
 
@@ -82,10 +80,10 @@ const LoadableMetadataSidebar = SidebarUtils.getAsyncSidebarContent(
     SIDEBAR_VIEW_METADATA,
     MARK_NAME_JS_LOADING_METADATA,
 );
-const LoadableVersionsSidebar = SidebarUtils.getAsyncSidebarContent(
-    SIDEBAR_VIEW_VERSIONS,
-    MARK_NAME_JS_LOADING_VERSIONS,
-);
+// const LoadableVersionsSidebar = SidebarUtils.getAsyncSidebarContent(
+//     SIDEBAR_VIEW_VERSIONS,
+//     MARK_NAME_JS_LOADING_VERSIONS,
+// );
 
 class SidebarPanels extends React.Component<Props, State> {
     activitySidebar: ElementRefType = React.createRef();
@@ -150,8 +148,8 @@ class SidebarPanels extends React.Component<Props, State> {
             onAnnotationSelect,
             onVersionChange,
             onVersionHistoryClick,
-            versionsSidebarProps,
-        }: Props = this.props;
+        }: // versionsSidebarProps,
+        Props = this.props;
 
         const { isInitialized } = this.state;
 
@@ -160,12 +158,23 @@ class SidebarPanels extends React.Component<Props, State> {
         }
 
         return (
-            <Switch>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <RedirectHandler
+                            hasSkills={hasSkills}
+                            hasActivity={hasActivity}
+                            hasDetails={hasDetails}
+                            hasMetadata={hasMetadata}
+                            hasVersions={hasVersions}
+                        />
+                    }
+                />
                 {hasSkills && (
                     <Route
-                        exact
                         path={`/${SIDEBAR_VIEW_SKILLS}`}
-                        render={() => (
+                        element={
                             <LoadableSkillsSidebar
                                 elementId={elementId}
                                 key={file.id}
@@ -175,26 +184,22 @@ class SidebarPanels extends React.Component<Props, State> {
                                 hasSidebarInitialized={isInitialized}
                                 startMarkName={MARK_NAME_JS_LOADING_SKILLS}
                             />
-                        )}
+                        }
                     />
                 )}
                 {/* This handles both the default activity sidebar and the activity sidebar with a
                 comment or task deeplink.  */}
-                {hasActivity && (
-                    <Route
-                        exact
-                        path={[
-                            `/${SIDEBAR_VIEW_ACTIVITY}`,
-                            `/${SIDEBAR_VIEW_ACTIVITY}/:activeFeedEntryType(annotations)/:fileVersionId/:activeFeedEntryId?`,
-                            `/${SIDEBAR_VIEW_ACTIVITY}/:activeFeedEntryType(comments|tasks)/:activeFeedEntryId?`,
-                        ]}
-                        render={({ match }) => {
-                            const matchEntryType = match.params.activeFeedEntryType;
-                            const activeFeedEntryType = matchEntryType
-                                ? URL_TO_FEED_ITEM_TYPE[matchEntryType]
-                                : undefined;
-                            return (
-                                <LoadableActivitySidebar
+                {hasActivity &&
+                    [
+                        `/${SIDEBAR_VIEW_ACTIVITY}`,
+                        `/${SIDEBAR_VIEW_ACTIVITY}/:activeFeedEntryType(annotations)/:fileVersionId/:activeFeedEntryId?`,
+                        `/${SIDEBAR_VIEW_ACTIVITY}/:activeFeedEntryType(comments|tasks)/:activeFeedEntryId?`,
+                    ].map(path => (
+                        <Route
+                            key={path}
+                            path={path}
+                            element={
+                                <ActivitySidebarWrapper
                                     elementId={elementId}
                                     currentUser={currentUser}
                                     currentUserError={currentUserError}
@@ -203,21 +208,17 @@ class SidebarPanels extends React.Component<Props, State> {
                                     onAnnotationSelect={onAnnotationSelect}
                                     onVersionChange={onVersionChange}
                                     onVersionHistoryClick={onVersionHistoryClick}
-                                    ref={this.activitySidebar}
+                                    activitySidebarRef={this.activitySidebar}
                                     startMarkName={MARK_NAME_JS_LOADING_ACTIVITY}
-                                    activeFeedEntryId={match.params.activeFeedEntryId}
-                                    activeFeedEntryType={match.params.activeFeedEntryId && activeFeedEntryType}
                                     {...activitySidebarProps}
                                 />
-                            );
-                        }}
-                    />
-                )}
+                            }
+                        />
+                    ))}
                 {hasDetails && (
                     <Route
-                        exact
                         path={`/${SIDEBAR_VIEW_DETAILS}`}
-                        render={() => (
+                        element={
                             <LoadableDetailsSidebar
                                 elementId={elementId}
                                 fileId={fileId}
@@ -229,14 +230,13 @@ class SidebarPanels extends React.Component<Props, State> {
                                 startMarkName={MARK_NAME_JS_LOADING_DETAILS}
                                 {...detailsSidebarProps}
                             />
-                        )}
+                        }
                     />
                 )}
                 {hasMetadata && (
                     <Route
-                        exact
                         path={`/${SIDEBAR_VIEW_METADATA}`}
-                        render={() => (
+                        element={
                             <LoadableMetadataSidebar
                                 elementId={elementId}
                                 fileId={fileId}
@@ -245,13 +245,13 @@ class SidebarPanels extends React.Component<Props, State> {
                                 startMarkName={MARK_NAME_JS_LOADING_METADATA}
                                 {...metadataSidebarProps}
                             />
-                        )}
+                        }
                     />
                 )}
-                {hasVersions && (
+                {/* {hasVersions && (
                     <Route
                         path="/:sidebar(activity|details)/versions/:versionId?"
-                        render={({ match }) => (
+                        element={({ match }) => (
                             <LoadableVersionsSidebar
                                 fileId={fileId}
                                 hasSidebarInitialized={isInitialized}
@@ -264,27 +264,44 @@ class SidebarPanels extends React.Component<Props, State> {
                             />
                         )}
                     />
-                )}
-                <Route
-                    render={() => {
-                        let redirect = '';
-
-                        if (hasSkills) {
-                            redirect = SIDEBAR_VIEW_SKILLS;
-                        } else if (hasActivity) {
-                            redirect = SIDEBAR_VIEW_ACTIVITY;
-                        } else if (hasDetails) {
-                            redirect = SIDEBAR_VIEW_DETAILS;
-                        } else if (hasMetadata) {
-                            redirect = SIDEBAR_VIEW_METADATA;
-                        }
-
-                        return <Redirect to={{ pathname: `/${redirect}`, state: { silent: true } }} />;
-                    }}
-                />
-            </Switch>
+                )} */}
+            </Routes>
         );
     }
+}
+
+function RedirectHandler({ hasSkills, hasActivity, hasDetails, hasMetadata }: any) {
+    let redirect = '';
+
+    if (hasSkills) {
+        redirect = `${SIDEBAR_VIEW_SKILLS}`;
+    } else if (hasActivity) {
+        redirect = `${SIDEBAR_VIEW_ACTIVITY}`;
+    } else if (hasDetails) {
+        redirect = `${SIDEBAR_VIEW_DETAILS}`;
+    } else if (hasMetadata) {
+        redirect = `${SIDEBAR_VIEW_METADATA}`;
+    }
+
+    console.log('redirecting?', redirect);
+    if (redirect) {
+        return <Navigate to={`/vault/${redirect}`} />;
+    }
+
+    return <Outlet />;
+}
+
+function ActivitySidebarWrapper(props) {
+    const { activeFeedEntryType: matchEntryType, activeFeedEntryId } = useParams();
+    const activeFeedEntryType = matchEntryType ? URL_TO_FEED_ITEM_TYPE[matchEntryType] : undefined;
+
+    return (
+        <LoadableActivitySidebar
+            {...props}
+            activeFeedEntryId={activeFeedEntryId}
+            activeFeedEntryType={activeFeedEntryId && activeFeedEntryType}
+        />
+    );
 }
 
 export { SidebarPanels as SidebarPanelsComponent };

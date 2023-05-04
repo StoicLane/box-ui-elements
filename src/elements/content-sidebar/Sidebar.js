@@ -10,7 +10,7 @@ import flow from 'lodash/flow';
 import getProp from 'lodash/get';
 import noop from 'lodash/noop';
 import uniqueid from 'lodash/uniqueId';
-import { withRouter } from 'react-router-dom';
+import { withRouter } from '../common/routing';
 import type { Location, RouterHistory } from 'react-router-dom';
 import LoadingIndicator from '../../components/loading-indicator/LoadingIndicator';
 import LocalStore from '../../utils/LocalStore';

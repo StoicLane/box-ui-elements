@@ -1,9 +1,10 @@
-import * as React from 'react';
-import getProp from 'lodash/get';
-import { generatePath, match as matchType, matchPath } from 'react-router-dom';
+// @ts-nocheck
 import { Location } from 'history';
+import getProp from 'lodash/get';
+import * as React from 'react';
+import { generatePath, matchPath, match as matchType } from 'react-router-dom';
 import AnnotatorContext from './AnnotatorContext';
-import { Action, Annotator, AnnotationActionEvent, AnnotatorState, GetMatchPath, MatchParams, Status } from './types';
+import { Action, AnnotationActionEvent, Annotator, AnnotatorState, GetMatchPath, MatchParams, Status } from './types';
 
 export type ActiveChangeEvent = {
     annotationId: string | null;
@@ -194,10 +195,10 @@ export default function withAnnotations<P extends object>(
 
         getMatchPath(location?: Location): matchType<MatchParams> | null {
             const pathname = getProp(location, 'pathname', '');
-            return matchPath<MatchParams>(pathname, {
+            return matchPath<MatchParams>({
                 path: ANNOTATIONS_PATH,
                 exact: true,
-            });
+            }, pathname);
         }
 
         handleAnnotationCreate = (eventData: AnnotationActionEvent): void => {

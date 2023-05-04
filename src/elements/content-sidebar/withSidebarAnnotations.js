@@ -1,12 +1,28 @@
 // @flow
-import * as React from 'react';
 import getProp from 'lodash/get';
 import noop from 'lodash/noop';
-import { matchPath, type ContextRouter } from 'react-router-dom';
+import * as React from 'react';
+import { matchPath } from 'react-router-dom';
+import type { BoxItem, User } from '../../common/types/core';
 import { FEED_ITEM_TYPE_VERSION } from '../../constants';
 import { getBadUserError } from '../../utils/error';
-import type { WithAnnotatorContextProps } from '../common/annotator-context';
-import type { BoxItem, User } from '../../common/types/core';
+
+interface WithAnnotatorContextProps {
+    annotatorState?: AnnotatorState;
+    emitActiveAnnotationChangeEvent?: (id: string) => void;
+    emitAnnotationRemoveEvent?: (id: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyCreateEvent?: (
+        reply: Object,
+        requestId: string,
+        annotationId: string,
+        isStartEvent?: boolean,
+    ) => void;
+    emitAnnotationReplyDeleteEvent?: (id: string, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyUpdateEvent?: (reply: Object, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationUpdateEvent?: (annotation: Object, isStartEvent?: boolean) => void;
+    getAnnotationsMatchPath?: GetMatchPath;
+    getAnnotationsPath?: (fileVersionId?: string, annotationId?: string) => string;
+}
 
 type Props = {
     ...ContextRouter,
@@ -284,10 +300,11 @@ export default function withSidebarAnnotations(
             const newLocationState = activeAnnotationId ? { open: true } : location.state;
 
             // Update the location pathname and open state if transitioning to an active annotation id, force the sidebar open
-            history.push({
-                pathname: getAnnotationsPath(fileVersionId, activeAnnotationId),
-                state: newLocationState,
-            });
+            // history.push({
+            //     pathname: getAnnotationsPath(fileVersionId, activeAnnotationId),
+            //     state: newLocationState,
+            // });
+            history.push(getAnnotationsPath(fileVersionId, activeAnnotationId), newLocationState);
         };
 
         updateActiveVersion = () => {
@@ -322,7 +339,7 @@ export default function withSidebarAnnotations(
             const { isOpen, location } = this.props;
 
             const pathname = getProp(location, 'pathname', '');
-            const isActivity = matchPath(pathname, '/activity');
+            const isActivity = matchPath('/activity', pathname);
             const { current } = this.sidebarPanels;
 
             // If the activity sidebar is currently open, then force it to refresh with the updated data

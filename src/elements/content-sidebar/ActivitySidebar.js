@@ -18,7 +18,7 @@ import AddTaskButton from './AddTaskButton';
 import API from '../../api';
 import messages from '../common/messages';
 import SidebarContent from './SidebarContent';
-import { WithAnnotatorContextProps, withAnnotatorContext } from '../common/annotator-context';
+import { withAnnotatorContext } from '../common/annotator-context';
 import { EVENT_DATA_READY, EVENT_JS_READY } from '../common/logger/constants';
 import { getBadUserError } from '../../utils/error';
 import { mark } from '../../utils/performance';
@@ -72,6 +72,23 @@ import type { Errors, GetProfileUrlCallback } from '../common/flowTypes';
 import type { Translations } from './flowTypes';
 import type { FeatureConfig } from '../common/feature-checking';
 import './ActivitySidebar.scss';
+
+interface WithAnnotatorContextProps {
+    annotatorState?: AnnotatorState;
+    emitActiveAnnotationChangeEvent?: (id: string) => void;
+    emitAnnotationRemoveEvent?: (id: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyCreateEvent?: (
+        reply: Object,
+        requestId: string,
+        annotationId: string,
+        isStartEvent?: boolean,
+    ) => void;
+    emitAnnotationReplyDeleteEvent?: (id: string, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationReplyUpdateEvent?: (reply: Object, annotationId: string, isStartEvent?: boolean) => void;
+    emitAnnotationUpdateEvent?: (annotation: Object, isStartEvent?: boolean) => void;
+    getAnnotationsMatchPath?: GetMatchPath;
+    getAnnotationsPath?: (fileVersionId?: string, annotationId?: string) => string;
+}
 
 type ExternalProps = {
     activeFeedEntryId?: string,

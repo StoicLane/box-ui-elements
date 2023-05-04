@@ -5,16 +5,18 @@
  */
 
 import * as React from 'react';
-import { withRouter, type RouterHistory } from 'react-router-dom';
+import { type RouterHistory } from 'react-router-dom';
 import SidebarToggleButton from '../../components/sidebar-toggle-button/SidebarToggleButton';
 import { SIDEBAR_NAV_TARGETS } from '../common/interactionTargets';
+import { withRouter } from '../common/routing';
 
 type Props = {
     history: RouterHistory,
     isOpen?: boolean,
+    location?: any,
 };
 
-const SidebarToggle = ({ history, isOpen }: Props) => {
+const SidebarToggle = ({ history, location, isOpen }: Props) => {
     return (
         <SidebarToggleButton
             data-resin-target={SIDEBAR_NAV_TARGETS.TOGGLE}
@@ -23,7 +25,7 @@ const SidebarToggle = ({ history, isOpen }: Props) => {
             isOpen={isOpen}
             onClick={event => {
                 event.preventDefault();
-                history.replace({ state: { open: !isOpen } });
+                history.replace(location.pathname, { open: !isOpen });
             }}
         />
     );
