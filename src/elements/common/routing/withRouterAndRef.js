@@ -10,7 +10,7 @@ export default function withRouterAndRef(Wrapped: React.ComponentType<any>) {
         const history = useHistory();
         const location = useLocation();
         const params = useParams();
-        const match = matchPath({ path: location.path }, location.pathname);
+        const match = matchPath({ path: location.pathname }, location.pathname);
 
         return <Wrapped ref={ref} history={history} match={match} params={params} location={location} {...props} />;
     });

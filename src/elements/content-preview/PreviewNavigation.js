@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { useIntl } from 'react-intl';
-import { Route, Routes, useMatch, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { BoxItem } from '../../common/types/core';
 import PlainButton from '../../components/plain-button/PlainButton';
 import IconNavigateLeft from '../../icons/general/IconNavigateLeft';
@@ -20,46 +20,17 @@ type Props = {
     onNavigateRight: Function,
 };
 
-const PreviewNavigation = ({ collection = [], currentIndex, onNavigateLeft, onNavigateRight }: Props) => {
-    const hasLeftNavigation = collection.length > 1 && currentIndex > 0 && currentIndex < collection.length;
-    const hasRightNavigation = collection.length > 1 && currentIndex > -1 && currentIndex < collection.length - 1;
+export const PreviewNavigation = ({ collection = [], currentIndex, onNavigateLeft, onNavigateRight }: Props) => {
+    const { activeTab, deeplink } = useParams();
+    const intl = useIntl();
+    const navigate = useNavigate();
+
+    const hasLeftNavigation = currentIndex > 0;
+    const hasRightNavigation = currentIndex < collection.length - 1;
 
     if (!hasLeftNavigation && !hasRightNavigation) {
         return null;
     }
-
-    return (
-        <Routes>
-            <Route
-                path="/vault/:activeTab/:deeplink"
-                element={
-                    <PreviewNavigationComponent
-                        onNavigateLeft={onNavigateLeft}
-                        onNavigateRight={onNavigateRight}
-                        hasLeftNavigation={hasLeftNavigation}
-                        hasRightNavigation={hasRightNavigation}
-                    />
-                }
-            />
-            <Route
-                path="/"
-                element={
-                    <PreviewNavigationComponent
-                        onNavigateLeft={onNavigateLeft}
-                        onNavigateRight={onNavigateRight}
-                        hasLeftNavigation={hasLeftNavigation}
-                        hasRightNavigation={hasRightNavigation}
-                    />
-                }
-            />
-        </Routes>
-    );
-};
-
-function PreviewNavigationComponent({ hasLeftNavigation, hasRightNavigation, onNavigateLeft, onNavigateRight }: any) {
-    const match = useMatch('/:activeTab/:deeplink') || {};
-    const navigate = useNavigate();
-    const intl = useIntl();
 
     return (
         <>
@@ -67,13 +38,12 @@ function PreviewNavigationComponent({ hasLeftNavigation, hasRightNavigation, onN
                 <PlainButton
                     className="bcpr-navigate-left"
                     onClick={() => {
-                        if (match.params.deeplink) {
-                            navigate(`/${match.params.activeTab}`);
+                        if (deeplink) {
+                            navigate(`/vault/${activeTab}`);
                         }
                         onNavigateLeft();
                     }}
                     title={intl.formatMessage(messages.previousFile)}
-                    type="button"
                 >
                     <IconNavigateLeft />
                 </PlainButton>
@@ -82,20 +52,18 @@ function PreviewNavigationComponent({ hasLeftNavigation, hasRightNavigation, onN
                 <PlainButton
                     className="bcpr-navigate-right"
                     onClick={() => {
-                        if (match.params.deeplink) {
-                            navigate(`/${match.params.activeTab}`);
+                        if (deeplink) {
+                            navigate(`/vault/${activeTab}`);
                         }
                         onNavigateRight();
                     }}
                     title={intl.formatMessage(messages.nextFile)}
-                    type="button"
                 >
                     <IconNavigateRight />
                 </PlainButton>
             )}
         </>
     );
-}
+};
 
-export { PreviewNavigation as PreviewNavigationComponent };
 export default PreviewNavigation;
