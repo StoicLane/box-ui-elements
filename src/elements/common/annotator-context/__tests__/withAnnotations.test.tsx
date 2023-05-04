@@ -2,12 +2,19 @@ import React, { Component } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { createMemoryHistory, History, Location } from 'history';
 import { Action, Annotator, AnnotatorContext, withAnnotations, Status } from '../index';
-import { WithAnnotationsProps, ComponentWithAnnotations } from '../withAnnotations';
+import { ComponentWithAnnotations } from '../withAnnotations';
 
 type ComponentProps = {
     className?: string;
     history?: History;
     location?: Location;
+};
+
+type WithAnnotationsProps = {
+    location?: Location;
+    onAnnotator: (annotator: Annotator) => void;
+    onError?: (error: Error, code: string, contextInfo?: Record<string, unknown>) => void;
+    onPreviewDestroy: (shouldReset?: boolean) => void;
 };
 
 type WrappedProps = ComponentProps & Partial<WithAnnotationsProps>;

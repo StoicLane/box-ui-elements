@@ -1,19 +1,8 @@
 import * as React from 'react';
-import { MemoryRouter, Router } from 'react-router';
-import { History } from 'history';
+import { MemoryRouter } from 'react-router';
 
-type Props = {
-    children: React.ReactNode;
-    history?: History;
-    initialEntries?: History.LocationDescriptor[];
-};
-
-const NavRouter = ({ children, history, ...rest }: Props) => {
-    if (history) {
-        return <Router history={history}>{children}</Router>;
-    }
-
-    return <MemoryRouter {...rest}>{children}</MemoryRouter>;
+const NavRouter = ({ children, ...rest }: any) => {
+    return children;
 };
 
 export default NavRouter;
