@@ -99,7 +99,7 @@ describe('features/content-explorer/content-explorer/ContentExplorer', () => {
         });
 
         test('should pass isSelectAllChecked to ContentExplorerSelectAll', () => {
-            const isSelectAllChecked = true;
+            const isSelectAllChecked = false;
             const wrapper = renderComponent({ isSelectAllAllowed: true });
             wrapper.setState({ isSelectAllChecked });
 
@@ -744,7 +744,7 @@ describe('features/content-explorer/content-explorer/ContentExplorer', () => {
             const instance = wrapper.instance();
             wrapper.setState({ isSelectAllChecked: false });
 
-            instance.selectAll = jest.fn();
+            instance.selectAll = jest.fn().mockReturnValue({});
 
             instance.unselectAll = jest.fn();
 
@@ -762,7 +762,7 @@ describe('features/content-explorer/content-explorer/ContentExplorer', () => {
 
             instance.selectAll = jest.fn();
 
-            instance.unselectAll = jest.fn();
+            instance.unselectAll = jest.fn().mockReturnValue({});
 
             instance.handleSelectAllClick();
 

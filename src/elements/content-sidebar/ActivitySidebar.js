@@ -89,6 +89,7 @@ interface WithAnnotatorContextProps {
     getAnnotationsMatchPath?: GetMatchPath;
     getAnnotationsPath?: (fileVersionId?: string, annotationId?: string) => string;
 }
+import { type OnAnnotationEdit } from './activity-feed/comment/types';
 
 type ExternalProps = {
     activeFeedEntryId?: string,
@@ -211,7 +212,7 @@ class ActivitySidebar extends React.PureComponent<Props, State> {
         this.fetchFeedItems();
     };
 
-    handleAnnotationEdit = (id: string, text: string, permissions: AnnotationPermission) => {
+    handleAnnotationEdit: OnAnnotationEdit = ({ id, text, permissions }) => {
         const { api, emitAnnotationUpdateEvent, file } = this.props;
 
         emitAnnotationUpdateEvent(
@@ -735,6 +736,7 @@ class ActivitySidebar extends React.PureComponent<Props, State> {
             activeFeedEntryType === FEED_ITEM_TYPE_COMMENT;
         const shouldShowAppActivity = isFeatureEnabled(features, 'activityFeed.appActivity.enabled');
         const shouldShowAnnotations = isFeatureEnabled(features, 'activityFeed.annotations.enabled');
+        const shouldUseUAA = isFeatureEnabled(features, 'activityFeed.uaaIntegration.enabled');
 
         api.getFeedAPI(shouldDestroy).feedItems(
             file,
@@ -742,7 +744,14 @@ class ActivitySidebar extends React.PureComponent<Props, State> {
             shouldFetchReplies ? this.fetchRepliesForFeedItems : this.fetchFeedItemsSuccessCallback,
             this.fetchFeedItemsErrorCallback,
             this.errorCallback,
-            { shouldShowAnnotations, shouldShowAppActivity, shouldShowReplies, shouldShowTasks, shouldShowVersions },
+            {
+                shouldShowAnnotations,
+                shouldShowAppActivity,
+                shouldShowReplies,
+                shouldShowTasks,
+                shouldShowVersions,
+                shouldUseUAA,
+            },
         );
     }
 
@@ -1243,6 +1252,7 @@ class ActivitySidebar extends React.PureComponent<Props, State> {
         } = this.props;
         const { activityFeedError, approverSelectorContacts, contactsLoaded, mentionSelectorContacts } = this.state;
         const isNewThreadedRepliesEnabled = isFeatureEnabled(features, 'activityFeed.newThreadedReplies.enabled');
+        const shouldUseUAA = isFeatureEnabled(features, 'activityFeed.uaaIntegration.enabled');
 
         return (
             <SidebarContent
@@ -1291,6 +1301,7 @@ class ActivitySidebar extends React.PureComponent<Props, State> {
                     onTaskUpdate={this.updateTask}
                     onTaskView={onTaskView}
                     onVersionHistoryClick={onVersionHistoryClick}
+                    shouldUseUAA={shouldUseUAA}
                 />
             </SidebarContent>
         );
